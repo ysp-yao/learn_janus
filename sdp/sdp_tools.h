@@ -235,3 +235,128 @@ SdpObj SdpParse(const std::string& sdp)
 
   return imported;
 }
+
+int sdp_get_codec_pt(const SdpObj& sdp, const std::string& codec) {
+  if (codec == "VP8")
+    return 120;
+  else // opus
+    return -1;
+}
+
+std::string sdp_get_codec_rtpmap(const std::string& codec) {
+  if (codec == "OPUS")
+    return "opus/48000/2";
+  else if (codec == "VP8")
+    return "VP8/90000";
+  else
+    return "";
+}
+
+
+
+SdpObj SdpGenerateAnswer(SdpObj offer, ...) {
+
+  bool do_audio = true, do_video = true, do_data = true,
+    audio_dtmf = false, video_rtcpfb = true, h264_fmtp = true;
+  const char *audio_codec = NULL, *video_codec = NULL;
+  sdp_mdirection audio_dir = SDP_SENDRECV, video_dir = SDP_SENDRECV;
+
+  SdpObj answer;
+  /* Start by copying some of the headers */
+  answer.version = offer.version;
+  answer.o_name = offer.o_name; // "-"
+  answer.o_sessid = offer.o_sessid;
+  answer.o_version = offer.o_version;
+  answer.o_ipv4 = offer.o_ipv4;
+  answer.o_addr = offer.o_addr; // "127.0.0.1"
+  answer.s_name = offer.s_name; // "Janus session"
+  answer.t_start = 0;
+  answer.t_stop = 0;
+  answer.c_ipv4 = offer.c_ipv4;
+  answer.c_addr = offer.c_addr; // "127.0.0.1"
+  answer.attributes;
+  answer.m_lines;
+
+  /* Now iterate on all media, and let's see what we should do */
+  int audio = 0, video = 0, data = 0;
+  std::vector<sdp_mline> m_lines = offer.m_lines;
+
+  for (int i = 0; i < m_lines.size(); ++i) {
+    sdp_mline m = m_lines[i];
+    sdp_mline am;
+    am.type = m.type;
+    am.type_str = m.type_str;
+    am.proto = m.proto; // "UDP/TLS/RTP/SAVPF"
+    am.port = m.port;
+    am.c_ipv4 = m.c_ipv4;
+    am.c_addr = am.c_addr; // "127.0.0.1"
+    am.direction = SDP_INACTIVE;	/* We'll change this later */
+
+    answer.m_lines.push_back(am);
+
+    if (m.type == SDP_AUDIO) {
+      if (m.port > 0) {
+        audio++;
+      }
+      if (!do_audio || audio > 1) {
+        /* Reject */
+        am.port = 0;
+        continue;
+      }
+    }
+    else if (m.type == SDP_VIDEO && m.port > 0) {
+      if (m.port > 0) {
+        video++;
+      }
+      if (!do_video || video > 1) {
+        /* Reject */
+        am.port = 0;
+        continue;
+      }
+    }
+    else if (m.type == SDP_APPLICATION && m.port > 0) {
+      if (m.port > 0) {
+        data++;
+      }
+      if (!do_data || data > 1) {
+        /* Reject */
+        am.port = 0;
+        continue;
+      }
+    }
+    if (m.type == SDP_AUDIO || m.type == SDP_VIDEO) {
+      sdp_mdirection target_dir = m.type==SDP_AUDIO ? audio_dir : video_dir;
+      switch (m.direction) {
+        case SDP_RECVONLY:
+          am.direction = SDP_SENDONLY;
+          break;
+        case SDP_SENDONLY:
+          am.direction = SDP_RECVONLY;
+          break;
+        case SDP_INACTIVE:
+          /* Peer inactive, set inactive in the answer to */
+          am.direction = SDP_INACTIVE;
+          break;
+        case SDP_SENDRECV:
+        default:
+          /* The peer is fine with everything, so use our constraint */
+          am.direction = target_dir;
+          break;
+      }
+      std::string codec = m.type==SDP_AUDIO ? "opus" : "vp8";
+      int pt = sdp_get_codec_pt(offer, codec);
+      am.ptypes.push_back(pt);
+      if (m.type == SDP_AUDIO) {
+
+      }
+      else {
+
+      }
+    }
+    else { // datachannel
+
+    }
+  }
+
+  return answer;
+}

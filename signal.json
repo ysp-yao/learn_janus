@@ -1,0 +1,45 @@
+// <--
+{
+  "janus":"create",
+  "transaction":""
+}
+
+// -->
+{
+
+}
+
+// <--
+{
+  "janus":"attach",
+  "opaque_id":"",
+  "plugin":"janus.plugin.echotest",
+  "session_id":,
+  "transaction":""
+}
+
+// <--
+{
+  "janus":"message",
+  "handle_id":123456,
+  "session_id":123456,
+  "body":{
+    "audio":true,
+    "video":true
+  },
+  "transaction":,
+}
+
+
+// <--
+{
+  "janus":"message",
+  "handle_id":123456,
+  "session_id":123456,
+  "body":{
+    "audio":true,
+    "video":true
+  },
+  "sdp":"",
+  "transaction":,
+}

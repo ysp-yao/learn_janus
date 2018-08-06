@@ -42,7 +42,7 @@ struct sdp_mline {
   std::string               b_name;       /*! \brief Media b= type */
   uint32_t                  b_value;      /*! \brief Media b= value */
   sdp_mdirection            direction;    /*! \brief Media direction */
-  std::vector<std::string>  attributes;   /*! \brief List of m-line attributes */
+  std::vector<sdp_attribute>  attributes;   /*! \brief List of m-line attributes */
 };
 
 struct SdpObj {
@@ -73,6 +73,19 @@ sdp_mtype sdp_parse_mtype(const std::string& type) {
   return SDP_OTHER;
 }
 
+sdp_mdirection sdp_parse_mdirection(const std::string& direction) {
+  if (direction.size() == 0)
+    return SDP_INVALID;
+  if (direction == "sendrecv")
+    return SDP_SENDRECV;
+  if (direction == "sendonly")
+    return SDP_SENDONLY;
+  if (direction == "recvonly")
+    return SDP_RECVONLY;
+  if (direction == "inactive")
+    return SDP_INACTIVE;
+  return SDP_INVALID;
+}
 
 SdpObj SdpParse(const std::string& sdp)
 {
@@ -171,8 +184,9 @@ SdpObj SdpParse(const std::string& sdp)
     }
     else {
       switch (line[0]) {
-        sdp_mline mline = imported.m_lines[imported.m_lines.size()-1];
         case 'c': {
+          sdp_mline &mline = imported.m_lines[imported.m_lines.size() - 1];
+
           std::vector<std::string> v = StrSplit(line, " ");
 
           if (v[1] == "IP4") {
@@ -189,18 +203,21 @@ SdpObj SdpParse(const std::string& sdp)
           break;
         }
         case 'a': {
+          sdp_mline &mline = imported.m_lines[imported.m_lines.size() - 1];
+
           sdp_attribute a;
           auto i = line.find(':');
           if (i == std::string::npos) {
             /* Is this a media direction attribute? */
-            mline.direction;
+            sdp_mdirection direction = sdp_parse_mdirection(line.substr(2));
+            mline.direction = direction;
           }
           else {
             a.name = line.substr(2, i - 2);
             a.value = line.substr(i + 1);
             a.direction = SDP_DEFAULT;
           }
-          imported.attributes.push_back(a);
+          mline.attributes.push_back(a);
           break;
         }
         case 'm': {

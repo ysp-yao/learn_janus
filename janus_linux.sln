@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "janus_linux", "janus_linux\janus_linux.vcxproj", "{BC7B51B8-B828-4D8C-B819-04E727F6A6D4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdp", "sdp\sdp.vcxproj", "{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -27,6 +29,16 @@ Global
 		{BC7B51B8-B828-4D8C-B819-04E727F6A6D4}.Release|x64.Build.0 = Release|x64
 		{BC7B51B8-B828-4D8C-B819-04E727F6A6D4}.Release|x86.ActiveCfg = Release|x86
 		{BC7B51B8-B828-4D8C-B819-04E727F6A6D4}.Release|x86.Build.0 = Release|x86
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Debug|ARM.ActiveCfg = Debug|Win32
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Debug|x64.ActiveCfg = Debug|x64
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Debug|x64.Build.0 = Debug|x64
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Debug|x86.ActiveCfg = Debug|Win32
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Debug|x86.Build.0 = Debug|Win32
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Release|ARM.ActiveCfg = Release|Win32
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Release|x64.ActiveCfg = Release|x64
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Release|x64.Build.0 = Release|x64
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Release|x86.ActiveCfg = Release|Win32
+		{A696637E-BCDB-4E86-80AF-CD1EF76BAE1A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

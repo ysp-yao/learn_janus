@@ -1,6 +1,6 @@
-#include "sdp_tools.h"
+//#include "sdp_tools.h"
 
-
+#include "sdp.h"
 #include <string>
 #include <regex>
 #include <iostream>
@@ -133,8 +133,14 @@ int main() {
 
   //std::vector<std::string> vec = StrSplit(sdp, "\r\n");
 
-  SdpObj offer = SdpParse(offer_sdp);
-  SdpObj answer = SdpGenerateAnswer(offer);
+
+  //SdpObj offer = SdpParse(offer_sdp);
+  //SdpObj answer = SdpGenerateAnswer(offer);
+  //std::string str = SdpWrite(answer);
+
+  Sdp sdp;
+  sdp.CreateAnswer(offer_sdp);
+
 
   return 0;
 }

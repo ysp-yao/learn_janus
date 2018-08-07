@@ -18,12 +18,18 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sdp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ulti.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sdp_tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sdp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

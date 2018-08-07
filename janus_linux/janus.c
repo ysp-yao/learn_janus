@@ -317,7 +317,7 @@ static json_t *janus_info(const char *transaction) {
 
 
 /* Logging */
-int janus_log_level = LOG_INFO;
+int janus_log_level = LOG_DBG;
 gboolean janus_log_timestamps = FALSE;
 gboolean janus_log_colors = FALSE;
 int lock_debug = 0;
@@ -3314,7 +3314,7 @@ gint main(int argc, char *argv[])
 
 	/* Logging level: default is info and no timestamps */
 	janus_log_level = LOG_INFO;
-	janus_log_timestamps = FALSE;
+	janus_log_timestamps = TRUE;
 	janus_log_colors = TRUE;
 	if(args_info.debug_level_given) {
 		if(args_info.debug_level_arg < LOG_NONE)

@@ -102,7 +102,7 @@ SdpObj SdpParse(const std::string& sdp)
   //for (const auto& line : parts) {
   bool is_mline = false;
   for (int i=0; i < parts.size();i) {
-    std::string line = parts[i];
+    const std::string& line = parts[i];
     if (line.size() == 0) {
       ++i;
       continue;
@@ -117,6 +117,7 @@ SdpObj SdpParse(const std::string& sdp)
     }
 
     if (!is_mline) {
+      /* 全局 */
       switch (line[0]) {
         case 'v': {
           sscanf(line.c_str(), "v=%d", &imported.version);
@@ -167,7 +168,7 @@ SdpObj SdpParse(const std::string& sdp)
           m.port = atoi(v[1].c_str());
           m.proto = v[2];
           m.direction = SDP_SENDRECV;
-          if (m.port > 0) {
+          if (m.port > 0) { // 否则表示禁用
             m.fmts = std::vector<std::string>(v.begin()+3, v.end());
             for (auto const& i : m.fmts)
               m.ptypes.push_back(atoi(i.c_str()));
@@ -183,6 +184,7 @@ SdpObj SdpParse(const std::string& sdp)
       }
     }
     else {
+      /* m= */
       switch (line[0]) {
         case 'c': {
           sdp_mline &mline = imported.m_lines[imported.m_lines.size() - 1];
@@ -210,7 +212,9 @@ SdpObj SdpParse(const std::string& sdp)
           if (i == std::string::npos) {
             /* Is this a media direction attribute? */
             sdp_mdirection direction = sdp_parse_mdirection(line.substr(2));
-            mline.direction = direction;
+            if (direction != SDP_INVALID)
+              mline.direction = direction;
+            a.name = line.substr(2);
           }
           else {
             a.name = line.substr(2, i - 2);
@@ -279,10 +283,10 @@ SdpObj SdpGenerateAnswer(SdpObj offer, ...) {
 
   /* Now iterate on all media, and let's see what we should do */
   int audio = 0, video = 0, data = 0;
-  std::vector<sdp_mline> m_lines = offer.m_lines;
+  const std::vector<sdp_mline> &m_lines = offer.m_lines;
 
   for (int i = 0; i < m_lines.size(); ++i) {
-    sdp_mline m = m_lines[i];
+    const sdp_mline &m = m_lines[i];
     sdp_mline am;
     am.type = m.type;
     am.type_str = m.type_str;
@@ -324,6 +328,7 @@ SdpObj SdpGenerateAnswer(SdpObj offer, ...) {
         continue;
       }
     }
+    
     if (m.type == SDP_AUDIO || m.type == SDP_VIDEO) {
       sdp_mdirection target_dir = m.type==SDP_AUDIO ? audio_dir : video_dir;
       switch (m.direction) {
@@ -343,15 +348,25 @@ SdpObj SdpGenerateAnswer(SdpObj offer, ...) {
           am.direction = target_dir;
           break;
       }
-      std::string codec = m.type==SDP_AUDIO ? "opus" : "vp8";
-      int pt = sdp_get_codec_pt(offer, codec);
-      am.ptypes.push_back(pt);
-      if (m.type == SDP_AUDIO) {
-
-      }
-      else {
-
-      }
+      //std::string codec = "vp8";
+      //int pt = 120;
+      ///* Add rtpmap attribute */
+      //janus_sdp_attribute *a = janus_sdp_attribute_create("rtpmap", "%d %s", pt, janus_sdp_get_codec_rtpmap(codec));
+      //am->attributes = g_list_append(am->attributes, a);
+      //if (video_rtcpfb) {
+      //  /* Add rtcp-fb attributes */
+      //  a = janus_sdp_attribute_create("rtcp-fb", "%d ccm fir", pt);
+      //  am->attributes = g_list_append(am->attributes, a);
+      //  a = janus_sdp_attribute_create("rtcp-fb", "%d nack", pt);
+      //  am->attributes = g_list_append(am->attributes, a);
+      //  a = janus_sdp_attribute_create("rtcp-fb", "%d nack pli", pt);
+      //  am->attributes = g_list_append(am->attributes, a);
+      //  a = janus_sdp_attribute_create("rtcp-fb", "%d goog-remb", pt);
+      //  am->attributes = g_list_append(am->attributes, a);
+      //  /* It is safe to add transport-wide rtcp feedback mesage here, won't be used unless the header extension is negotiated*/
+      //  a = janus_sdp_attribute_create("rtcp-fb", "%d transport-cc", pt);
+      //  am->attributes = g_list_append(am->attributes, a);
+      //}
     }
     else { // datachannel
 
@@ -359,4 +374,117 @@ SdpObj SdpGenerateAnswer(SdpObj offer, ...) {
   }
 
   return answer;
+}
+
+#define SDP_APPEND_LINE \
+{ \
+  buffer[written] = '\0'; \
+  sdp += buffer; \
+}
+
+std::string sdp_mdirection_str(sdp_mdirection direction) {
+  switch (direction) {
+  case SDP_DEFAULT:
+  case SDP_SENDRECV:
+    return "sendrecv";
+  case SDP_SENDONLY:
+    return "sendonly";
+  case SDP_RECVONLY:
+    return "recvonly";
+  case SDP_INACTIVE:
+    return "inactive";
+  case SDP_INVALID:
+  default:
+    break;
+  }
+  return NULL;
+}
+
+
+std::string SdpWrite(SdpObj imported) {
+
+  std::string sdp;
+  char buffer[1024];
+  int written = 0;
+
+  /* v= */
+  written = snprintf(buffer, sizeof(buffer), "v=%d\r\n", imported.version);
+  SDP_APPEND_LINE
+  /* o= */
+  written = snprintf(buffer, sizeof(buffer), "o=%s %lld %lld IN %s %s\r\n",
+    imported.o_name.c_str(), imported.o_sessid, imported.o_version,
+    imported.o_ipv4 ? "IP4" : "IP6", imported.o_addr.c_str());
+  SDP_APPEND_LINE
+  /* s= */
+  written = snprintf(buffer, sizeof(buffer), "s=%s\r\n", imported.s_name.c_str());
+  SDP_APPEND_LINE
+  /* t= */
+  written = snprintf(buffer, sizeof(buffer), "t=%lld lld\r\n", imported.t_start, imported.t_stop);
+  SDP_APPEND_LINE
+  /* c= */
+  if (imported.c_addr.size() != 0) {
+    written = snprintf(buffer, sizeof(buffer), "c=IN %s %s\r\n",
+      imported.c_ipv4 ? "IP4" : "IP6", imported.c_addr.c_str());
+    SDP_APPEND_LINE
+  }
+  /* a= */
+  // 全局a=，存在std::vector<sdp_attribute>中
+  for (int i = 0; i < imported.attributes.size(); ++i) {
+    const sdp_attribute &a = imported.attributes[i];
+    if (a.value.size() != 0) {
+      written = snprintf(buffer, sizeof(buffer), "a=%s:%s\r\n", a.name.c_str(), a.value.c_str());
+    }
+    else {
+      written = snprintf(buffer, sizeof(buffer), "a=%s\r\n", a.name.c_str());
+    }
+    SDP_APPEND_LINE
+  }
+  /* m= */
+  // 存在std::vector<sdp_mline>中
+  for (int i = 0; i < imported.m_lines.size(); ++i) {
+    const sdp_mline &m = imported.m_lines[i];
+    written = snprintf(buffer, sizeof(buffer), "m=%s %d %s", m.type_str.c_str(), m.port, m.proto.c_str());
+    SDP_APPEND_LINE
+    if (m.port == 0) {
+      /* Remove all payload types/formats if we're rejecting the media */
+      sdp += " 0";
+    }
+    else {
+      if (m.proto.find("RTP") != std::string::npos) {
+        /* RTP profile, use payload types */
+
+      }
+      else {
+        /* Something else, use formats */
+
+      }
+    }
+    sdp += "\r\n";
+    /* c= */
+    if (m.c_addr.size() != 0) {
+      written = snprintf(buffer, sizeof(buffer), "c=IN %s %s\r\n",
+        m.c_ipv4 ? "IP4" : "IP6", m.c_addr.c_str());
+      SDP_APPEND_LINE
+    }
+    /* a= (note that we don't format the direction if it's JANUS_SDP_DEFAULT) */
+    std::string direction = sdp_mdirection_str(m.direction);
+    written = snprintf(buffer, sizeof(buffer), "a=%s\r\n", direction.c_str());
+    SDP_APPEND_LINE
+      if (m.port == 0) {
+        /* No point going on */
+        continue;
+      }
+    /* 属于m=的a= */
+    for (int j = 0; j < m.attributes.size(); ++j) {
+      const sdp_attribute &a = m.attributes[j];
+      if (a.value.size() != 0) {
+        written = snprintf(buffer, sizeof(buffer), "a=%s:%s\r\n", a.name.c_str(), a.value.c_str());
+      }
+      else {
+        written = snprintf(buffer, sizeof(buffer), "a=%s\r\n", a.name.c_str());
+      }
+      SDP_APPEND_LINE
+    }
+  }
+  return sdp;
 }

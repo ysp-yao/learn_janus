@@ -27,14 +27,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="debug.h" />
+    <ClInclude Include="ice.h" />
     <ClInclude Include="janus.h" />
+    <ClInclude Include="log.h" />
     <ClInclude Include="plugins\plugin.h" />
     <ClInclude Include="sdp-utils.h" />
     <ClInclude Include="sdp.h" />
     <ClInclude Include="transports\transport.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ice.c" />
     <ClCompile Include="janus.c" />
+    <ClCompile Include="log.c" />
     <ClCompile Include="plugins\janus_echotest.c" />
     <ClCompile Include="plugins\plugin.c" />
     <ClCompile Include="sdp-utils.c" />

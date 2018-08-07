@@ -93,7 +93,9 @@ remoteVideo.onresize = function() {
 };
 
 function Connect() {
-  ws = new WebSocket('ws://192.168.1.118:8188', 'janus-protocol');
+  //ws = new WebSocket('ws://192.168.1.118:8188', 'janus-protocol');
+  ws = new WebSocket('ws://172.16.16.194:8188', 'janus-protocol');
+  
   ws.onopen = function()
   {
     var json = {};

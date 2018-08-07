@@ -117,8 +117,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="sdp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="sdp.h" />
     <ClInclude Include="sdp_tools.h" />
     <ClInclude Include="ulti.h" />
   </ItemGroup>

@@ -90,6 +90,11 @@ private:
   std::unique_ptr<SdpObj> offer_sdp_;
   std::unique_ptr<SdpObj> answer_sdp_;
   bool video_rtcpfb_ = true;
+
+  uint32_t video_ssrc_; // 32Î»Ëæ»úÊý
+  std::string cname_;
+  std::string stream_id_;
+  std::string track_id_;
 };
 
 #endif // SDP_H_

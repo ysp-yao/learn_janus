@@ -11,6 +11,7 @@ std::string Sdp::CreateAnswer(const std::string& remote_sdp)
 {
   this->sdp_parse(remote_sdp);
   this->sdp_generate_answer();
+  this->sdp_generate_answer_1();
   return this->sdp_write();
 }
 
@@ -344,5 +345,43 @@ std::string Sdp::sdp_mdirection_str(sdp_mdirection direction)
 
 void Sdp::sdp_generate_answer_1()
 {
+  /* 全局 */
+  // public ip
+  this->answer_sdp_->o_addr; 
 
+  // 不要全局的c=
+
+  // a=bundle
+  this->answer_sdp_->attributes.emplace_back("group", "BUNDLE video", SDP_DEFAULT);
+  this->answer_sdp_->attributes.emplace_back("msid-semantic", " WMS janus", SDP_DEFAULT);
+
+  /* 局部 */
+  this->answer_sdp_->m_lines[0].c_addr = "127.0.0.1";
+
+  // ice相关
+  {
+    std::vector<sdp_attribute> attributes;
+    attributes.push_back(sdp_attribute("ice-ufrag", "xxxx", SDP_DEFAULT));
+    attributes.push_back(sdp_attribute("ice-pwd", "xxxx", SDP_DEFAULT));
+    attributes.push_back(sdp_attribute("ice-options", "xxxx", SDP_DEFAULT));
+    attributes.push_back(sdp_attribute("fingerprint", "xxxx", SDP_DEFAULT));
+    attributes.push_back(sdp_attribute("setup", "xxxx", SDP_DEFAULT));
+    this->answer_sdp_->m_lines[0].attributes.insert(this->answer_sdp_->m_lines[0].attributes.begin(), attributes.begin(), attributes.end());
+  }
+  //
+  {
+    std::vector<sdp_attribute> attributes;
+    attributes.push_back(sdp_attribute("mid", "video", SDP_DEFAULT));
+    attributes.push_back(sdp_attribute("rtcp-mux", "", SDP_DEFAULT));
+    this->answer_sdp_->m_lines[0].attributes.insert(this->answer_sdp_->m_lines[0].attributes.begin(), attributes.begin(), attributes.end());
+  }
+  // rtcp and ssrc(mid)
+  this->answer_sdp_->m_lines[0].attributes.emplace_back("ssrc", "xxxx cname:janusvideo", SDP_DEFAULT);
+  this->answer_sdp_->m_lines[0].attributes.emplace_back("ssrc", "xxxx msid:janus janusv0", SDP_DEFAULT);
+  this->answer_sdp_->m_lines[0].attributes.emplace_back("ssrc", "xxxx mslabel:janus", SDP_DEFAULT);
+  this->answer_sdp_->m_lines[0].attributes.emplace_back("ssrc", "xxxx label:janusv0", SDP_DEFAULT);
+
+  // ice candidate
+  this->answer_sdp_->m_lines[0].attributes.emplace_back("candidate", "xxxx", SDP_DEFAULT);
+  this->answer_sdp_->m_lines[0].attributes.emplace_back("end-of-candidates", "", SDP_DEFAULT);
 }

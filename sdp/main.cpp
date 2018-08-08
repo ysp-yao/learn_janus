@@ -131,16 +131,8 @@ std::string answer_sdp =
 
 int main() {
 
-  //std::vector<std::string> vec = StrSplit(sdp, "\r\n");
-
-
-  //SdpObj offer = SdpParse(offer_sdp);
-  //SdpObj answer = SdpGenerateAnswer(offer);
-  //std::string str = SdpWrite(answer);
-
   Sdp sdp;
-  sdp.CreateAnswer(offer_sdp);
-
+  std::string sss = sdp.CreateAnswer(offer_sdp);
 
   return 0;
 }

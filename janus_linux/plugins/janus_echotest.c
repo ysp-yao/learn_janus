@@ -663,37 +663,37 @@ void janus_echotest_incoming_rtp(janus_plugin_session *handle, int video, char *
 }
 
 void janus_echotest_incoming_rtcp(janus_plugin_session *handle, int video, char *buf, int len) {
-	if(handle == NULL || g_atomic_int_get(&handle->stopped) || g_atomic_int_get(&stopping) || !g_atomic_int_get(&initialized))
-		return;
-	/* Simple echo test */
-	if(gateway) {
-		janus_echotest_session *session = (janus_echotest_session *)handle->plugin_handle;	
-		if(!session) {
-			JANUS_LOG(LOG_ERR, "No session associated with this handle...\n");
-			return;
-		}
-		if(g_atomic_int_get(&session->destroyed))
-			return;
-		guint32 bitrate = janus_rtcp_get_remb(buf, len);
-		if(bitrate > 0) {
-			/* If a REMB arrived, make sure we cap it to our configuration, and send it as a video RTCP */
-			session->peer_bitrate = bitrate;
-			if(session->bitrate > 0) {
-				char rtcpbuf[32];
-				int numssrc = 1;
-				if(session->ssrc[1])
-					numssrc++;
-				if(session->ssrc[2])
-					numssrc++;
-				int remblen = janus_rtcp_remb_ssrcs((char *)(&rtcpbuf), sizeof(rtcpbuf), session->bitrate, numssrc);
-				gateway->relay_rtcp(handle, 1, rtcpbuf, remblen);
-			} else {
-				gateway->relay_rtcp(handle, 1, buf, len);
-			}
-			return;
-		}
-		gateway->relay_rtcp(handle, video, buf, len);
-	}
+	//if(handle == NULL || g_atomic_int_get(&handle->stopped) || g_atomic_int_get(&stopping) || !g_atomic_int_get(&initialized))
+	//	return;
+	///* Simple echo test */
+	//if(gateway) {
+	//	janus_echotest_session *session = (janus_echotest_session *)handle->plugin_handle;	
+	//	if(!session) {
+	//		JANUS_LOG(LOG_ERR, "No session associated with this handle...\n");
+	//		return;
+	//	}
+	//	if(g_atomic_int_get(&session->destroyed))
+	//		return;
+	//	guint32 bitrate = janus_rtcp_get_remb(buf, len);
+	//	if(bitrate > 0) {
+	//		/* If a REMB arrived, make sure we cap it to our configuration, and send it as a video RTCP */
+	//		session->peer_bitrate = bitrate;
+	//		if(session->bitrate > 0) {
+	//			char rtcpbuf[32];
+	//			int numssrc = 1;
+	//			if(session->ssrc[1])
+	//				numssrc++;
+	//			if(session->ssrc[2])
+	//				numssrc++;
+	//			int remblen = janus_rtcp_remb_ssrcs((char *)(&rtcpbuf), sizeof(rtcpbuf), session->bitrate, numssrc);
+	//			gateway->relay_rtcp(handle, 1, rtcpbuf, remblen);
+	//		} else {
+	//			gateway->relay_rtcp(handle, 1, buf, len);
+	//		}
+	//		return;
+	//	}
+	//	gateway->relay_rtcp(handle, video, buf, len);
+	//}
 }
 
 void janus_echotest_incoming_data(janus_plugin_session *handle, char *buf, int len) {
